@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "5ire Coin Transer",
+  title: "5ire Coin Tranfser",
   description: "This app allows users to transer the 5ire Coin from 5ireChain to another blockchain networks.",
 };
 
