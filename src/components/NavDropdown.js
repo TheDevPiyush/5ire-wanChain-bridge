@@ -1,15 +1,10 @@
 "use client"
-
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
-
-import { cn } from "@/lib/utils"
+import { ChevronsUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     Command,
-    CommandEmpty,
     CommandGroup,
-    CommandInput,
     CommandItem,
     CommandList,
 } from "@/components/ui/command"
@@ -19,9 +14,14 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { truncateAddress } from "./truncateAddress"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { CommandSeparator } from "cmdk"
 
 export function NavDropDown({ logout, account, balance, selectedChain }) {
     const [open, setOpen] = React.useState(false)
+
+    const location = usePathname()
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -39,16 +39,33 @@ export function NavDropDown({ logout, account, balance, selectedChain }) {
                 <Command>
                     <CommandList>
                         <CommandGroup>
-                            <CommandItem>
-                                Balance : <span className="text-amber-500 font-bold">{balance} ETH </span>
+
+                            <CommandItem className={`my-3 ${location === '/' ? 'font-bold text-white bg-primary' : ''}`}>
+                                <Link className="w-full" href={'/'}>Lock & Transfer Coins</Link>
                             </CommandItem>
-                            <CommandItem>
-                                Chain : <span className="text-amber-500 font-bold">{selectedChain}</span>
+
+                            <CommandItem className={`my-3 ${location === '/ReceiveCoins' ? 'font-bold text-white bg-primary' : ''}`}>
+                                <Link
+                                    className="w-full"
+                                    href={'/ReceiveCoins'}>
+                                    Unlock & Redeem Coins
+                                </Link>
                             </CommandItem>
-                            <CommandItem className='text-red-400 font-semibold'>
+
+                            <CommandItem className='my-3 text-red-400 font-semibold'>
                                 <div onClick={logout} className="w-full" >
                                     Log Out
                                 </div>
+                            </CommandItem>
+
+                            <CommandSeparator />
+
+
+                            <CommandItem disabled>
+                                Balance : <span className="text-amber-500 font-bold">{balance} ETH </span>
+                            </CommandItem>
+                            <CommandItem disabled>
+                                Chain : <span className="text-amber-500 font-bold">{selectedChain}</span>
                             </CommandItem>
                         </CommandGroup>
                     </CommandList>

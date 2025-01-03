@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ethers, LogDescription } from "ethers";
+import { ethers } from "ethers";
 import abi from "./abi.json";
 import { useTheme } from "next-themes";
 
@@ -11,8 +11,6 @@ import {
   CardContent,
   CardHeader,
   CardFooter,
-  CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,14 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ToggleTheme } from "@/components/toggle-theme";
-import Image from "next/image";
-import { NavDropDown } from "@/components/NavDropdown";
 import useWallet from "@/hooks/useWallet";
-import AlertDilog from "@/components/AlertDilog";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@radix-ui/react-toast";
 import { truncateAddress } from "@/components/truncateAddress";
+import Navbar from "@/components/Navbar";
 export default function LockContractApp() {
   // --- State variables ---
   const [account, setAccount] = useState("");
@@ -47,7 +42,7 @@ export default function LockContractApp() {
   const [amount, setAmount] = useState("");
   const [gasLimit, setGasLimit] = useState("300000");
   const [error, setError] = useState("");
-  const [logoURL, setLogoURL] = useState(null);
+  const [logoURL, setLogoURL] = useState('https://5ire.org/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Flogo_light.57910aff.png&w=256&q=75');
   const [loading, setLoading] = useState(false);
   const [txHash, setTxHash] = useState('')
   const [selectedChain, setSelectedChain] = useState('')
@@ -104,11 +99,6 @@ export default function LockContractApp() {
     } catch (error) {
       console.error("Error fetching total supply:", error);
       setError(error.toString());
-      toast({
-        variant: "destructive",
-        title: 'Could not update total supply.',
-        description: 'Make sure you are on 5ire scan network, and logged in.',
-      })
     }
   };
 
@@ -122,8 +112,7 @@ export default function LockContractApp() {
       console.error("Error fetching balance:", error);
       toast({
         variant: "destructive",
-        title: 'Could not update balance.',
-        description: 'Make sure you are on 5ire scan network, and logged in.',
+        description: "Please Choose 5ire Network in MetaMask to Lock Coins.",
       })
       setError(error.toString());
     }
@@ -136,7 +125,7 @@ export default function LockContractApp() {
     try {
       setLoading(true);
       const amountWei = ethers.parseEther(amount || "0");
-      const gasFee = ethers.parseEther("1.34");
+      const gasFee = ethers.parseEther("1.4");
 
       const tx = await lockContract.lockCoin(
         BigInt(toChainId),
@@ -252,37 +241,35 @@ export default function LockContractApp() {
       window.ethereum.on('chainChanged', (chainHEX) => {
         const currentChainID = parseInt(chainHEX);
         setSelectedChain(currentChainID);
+        connectWallet();
       })
 
-      window.ethereum.on("accountsChanged", (accounts) => {
-
-        if (accounts.length > 0) {
-          connectWallet();
-        } else {
-          updateWalletAddress(null);
-          setAccount(null)
-        }
+      window.ethereum.on("accountsChanged", () => {
+        connectWallet();
       });
     }
   }, [theme])
 
   return (
     <div className="p-6">
-      <nav className="flex items-center justify-between">
 
-        {theme === 'dark' ?
-          <img src={logoURL} className="w-[6rem] h-[2.5rem]" alt="" />
-          :
-          <img src={logoURL} className="w-[6rem] h-[2.5rem]" alt="" />}
+      {/*--------------------------------
+      Navbar
+      ------------------------------------*/}
 
-        <div className="flex gap-2">
-          <NavDropDown logout={logout} account={account} selectedChain={selectedChain} totalSupply={totalSupply} balance={balance} />
-          <ToggleTheme />
-        </div>
-      </nav>
+      <Navbar
+        logout={logout}
+        account={account}
+        selectedChain={selectedChain}
+        totalSupply={totalSupply}
+        balance={balance}
+        logoURL={logoURL} theme={theme} />
 
 
-      {/* Main card component. */}
+      {/* -------------------------------------------------
+      LOCK COINS --- card component. 
+      -----------------------------------------------------*/}
+
       <Card className="max-w-xl mx-auto">
         <CardHeader className='my-2'>
           <h1 className="text-2xl font-bold">

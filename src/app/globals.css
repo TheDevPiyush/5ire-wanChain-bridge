@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  /* font-family: monospace; */
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -63,6 +59,16 @@ body {
   }
 }
 
+::-webkit-scrollbar {
+  width: 0.3rem;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(18, 17, 72, 0.63);
+}
+
+::-webkit-scrollbar-track {
+  width: 1rem;
+}
 @layer base {
   * {
     @apply border-border;
