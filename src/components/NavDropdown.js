@@ -48,7 +48,7 @@ export function NavDropDown({ logout, account, balance, selectedChain }) {
                                 <Link
                                     className="w-full"
                                     href={'/ReceiveCoins'}>
-                                    Unlock & Redeem Coins
+                                    Unlock & Mint Coins
                                 </Link>
                             </CommandItem>
 
