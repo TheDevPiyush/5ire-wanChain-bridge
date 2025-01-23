@@ -153,7 +153,8 @@ export default function LockContractApp() {
       console.error("Error locking coins:", error);
       toast({
         variant: "destructive",
-        description: 'Transaction Failed! ❌',
+        title: 'Transaction Failed! 🛑',
+        description: "Make sure you've selected 5ireChain in wallet."
       })
       setError(error.toString());
     }

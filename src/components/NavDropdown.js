@@ -19,9 +19,9 @@ import { usePathname } from "next/navigation"
 import { CommandSeparator } from "cmdk"
 
 export function NavDropDown({ logout, account, balance, selectedChain }) {
-    const [open, setOpen] = React.useState(false)
+    const [open, setOpen] = React.useState(false);
 
-    const location = usePathname()
+    const location = usePathname();
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -41,14 +41,14 @@ export function NavDropDown({ logout, account, balance, selectedChain }) {
                         <CommandGroup>
 
                             <CommandItem className={`my-3 ${location === '/' ? 'font-bold text-white bg-primary' : ''}`}>
-                                <Link className="w-full" href={'/'}>Lock & Transfer Coins</Link>
+                                <Link className="w-full" href={'/'}>Lock Coins</Link>
                             </CommandItem>
 
                             <CommandItem className={`my-3 ${location === '/ReceiveCoins' ? 'font-bold text-white bg-primary' : ''}`}>
                                 <Link
                                     className="w-full"
-                                    href={'/ReceiveCoins'}>
-                                    Unlock & Mint Coins
+                                    href={'/unlockCoins'}>
+                                    Unlock Coins
                                 </Link>
                             </CommandItem>
 
@@ -62,7 +62,7 @@ export function NavDropDown({ logout, account, balance, selectedChain }) {
 
 
                             <CommandItem disabled>
-                                Balance : <span className="text-amber-500 font-bold">{balance} ETH </span>
+                                Balance : <span className="text-amber-500 font-bold">{balance} 5ire </span>
                             </CommandItem>
                             <CommandItem disabled>
                                 Chain : <span className="text-amber-500 font-bold">{selectedChain}</span>

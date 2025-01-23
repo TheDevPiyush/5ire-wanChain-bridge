@@ -22,8 +22,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { ToggleTheme } from "@/components/toggle-theme";
-import { NavDropDown } from "@/components/NavDropdown";
 import useWallet from "@/hooks/useWallet";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@radix-ui/react-toast";
@@ -159,8 +157,8 @@ export default function UnlockContractApp() {
             console.error("Error unlocking coins:", err);
             toast({
                 variant: "destructive",
-                title: "Unlock Transaction Failed! ❌",
-                description: "Please ensure you have enough gas fee in wallet & entered details are correct.",
+                title: "Transaction Failed! ❌",
+                description: "Make sure you've selected Polygon in wallet.",
             });
             setError(err.toString());
         }
@@ -342,7 +340,7 @@ export default function UnlockContractApp() {
                                     <span className="animate-spin border-2 border-l-0 border-purple-200 w-7 h-7 rounded-full ml-2" />
                                 </>
                             ) : (
-                                "Unlock & Bridge Back"
+                                "Unlock Coins"
                             )}
                         </Button>
                     ) : (
