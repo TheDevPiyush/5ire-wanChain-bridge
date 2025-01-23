@@ -276,6 +276,7 @@ export default function LockContractApp() {
           <h1 className="text-2xl font-bold">
             Transfer 5ire Coins to Other Chains
           </h1>
+          <div className="text-base text-muted-foreground">Make sure you've selected 5ireChain - TestNet in wallet.</div>
         </CardHeader>
 
         {/*Contains Input fields for the card.  */}

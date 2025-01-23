@@ -269,6 +269,7 @@ export default function UnlockContractApp() {
             <Card className="max-w-xl mx-auto">
                 <CardHeader className="my-2">
                     <h1 className="text-2xl font-bold">Unlock 5ire Coins</h1>
+                    <div className="text-base text-muted-foreground">Make sure you've selected Amoy Polygon in wallet.</div>
                 </CardHeader>
 
                 <CardContent>
