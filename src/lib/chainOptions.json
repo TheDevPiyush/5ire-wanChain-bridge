@@ -1,22 +1,22 @@
 [
     {
-        "name": "Ethereum",
-        "chainId": 1
+        "name": "5ireChain Thunder Testnet",
+        "chainId": 997,
+        "iconUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbhu05xHrL89iGfHvSnNhRHM_NqFhwtXMKIw&s"
     },
     {
-        "name": "BNB Smart Chain",
-        "chainId": 56
+        "name": "BNB Smart Chain Testnet",
+        "chainId": 97,
+        "iconUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4BmPQQKuCgXZG5zyFRvIJRi9TzBHYLaJ-cA&s"
     },
     {
-        "name": "Polygon (Matic)",
-        "chainId": 137
+        "name": "Ethereum Sepolia Testnet",
+        "chainId": 11155111,
+        "iconUrl": "https://developers.moralis.com/wp-content/uploads/web3wiki/159-goerli/637aee14aa9d9f521437ec16_hYC2y965v3QD7fEoVvutzGbJzVGLSOk6RZPwEQWcA_E.jpeg"
     },
     {
-        "name": "Avalanche C-Chain",
-        "chainId": 43114
-    },
-    {
-        "name": "Fantom Opera",
-        "chainId": 250
+        "name": "Polygon Amoy Testnet",
+        "chainId": 80002,
+        "iconUrl": "https://cdn.iconscout.com/icon/free/png-256/free-polygon-token-4086724-3379854.png"
     }
 ]

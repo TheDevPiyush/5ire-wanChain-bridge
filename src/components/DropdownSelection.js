@@ -48,14 +48,15 @@ export function DropdownSelection({ options, onSelect, disabled }) {
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="p-0">
-                <Command>
-                    <CommandInput className="w-[300px]" placeholder="Search options..." />
+            <PopoverContent className="p-0 bg-transparent backdrop-blur-md shadow-xl">
+                <Command className="bg-transparent">
+                    <CommandInput className="w-[400px]" placeholder="Search options..." />
                     <CommandList>
                         <CommandEmpty>No options found.</CommandEmpty>
                         <CommandGroup>
                             {options.map((option) => (
                                 <CommandItem
+                                    className={`${name === option.name ? 'font-bold' : ''}`}
                                     key={option.name}
                                     name={option.name}
                                     onSelect={() => handleSelect(option.name)}
@@ -66,7 +67,10 @@ export function DropdownSelection({ options, onSelect, disabled }) {
                                             name === option.name ? "opacity-100" : "opacity-0"
                                         )}
                                     />
-                                    {option.name}
+                                    <div className="flex justify-center items-center gap-2">
+                                        <span><img className="w-[34px] rounded-full" src={option.iconUrl} alt="" /></span>
+                                        <span>{option.name}</span>
+                                    </div>
                                 </CommandItem>
                             ))}
                         </CommandGroup>
