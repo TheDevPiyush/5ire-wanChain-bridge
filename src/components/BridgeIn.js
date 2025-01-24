@@ -49,7 +49,8 @@ export default function BridgeInCard() {
     return (
         <Card
             className="        
-            mx-auto 
+            h-fit
+            mx-3
             w-full 
             max-w-md 
             rounded-lg 

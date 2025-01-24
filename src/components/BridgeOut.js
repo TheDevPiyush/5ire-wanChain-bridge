@@ -38,7 +38,8 @@ export default function BridgeOutCard() {
     return (
         <Card
             className="        
-            mx-auto 
+            h-fit
+            mx-3
             w-full 
             max-w-md 
             rounded-lg 
@@ -100,7 +101,7 @@ export default function BridgeOutCard() {
                     disabled={!fromChain || !toChain || !tokenAmount}
                     onClick={handleBridge}
                 >
-                    Bridge In
+                    Bridge Out
                 </Button>
             </CardFooter>
         </Card>

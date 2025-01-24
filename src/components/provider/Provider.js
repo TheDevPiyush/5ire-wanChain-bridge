@@ -30,10 +30,16 @@ export default function Provider({ children }) {
                                 lightMode: lightTheme(),
                                 darkMode: darkTheme({ overlayBlur: 'small' }),
                             }}>
-                                <div className="connect-btn w-full flex justify-end">
+                                <div className="connect-btn w-full flex px-4 my-3 justify-end">
                                     <ConnectButton
-                                        chainStatus={'icon'}
-                                        showBalance={true}
+                                        chainStatus={{
+                                            smallScreen: 'icon',
+                                            largeScreen: 'full'
+                                        }}
+                                        showBalance={{
+                                            smallScreen: false,
+                                            largeScreen: true
+                                        }}
                                         accountStatus={{
                                             smallScreen: 'avatar',
                                             largeScreen: 'avatar',

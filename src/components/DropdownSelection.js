@@ -44,13 +44,13 @@ export function DropdownSelection({ options, onSelect, disabled }) {
                 >
                     {name
                         ? options.find((option) => option.name === name)?.name
-                        : "Select options..."}
+                        : "Select a network"}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="p-0 bg-transparent backdrop-blur-md shadow-xl">
                 <Command className="bg-transparent">
-                    <CommandInput className="w-[400px]" placeholder="Search options..." />
+                    <CommandInput className="w-[400px]" placeholder="Search networks..." />
                     <CommandList>
                         <CommandEmpty>No options found.</CommandEmpty>
                         <CommandGroup>
