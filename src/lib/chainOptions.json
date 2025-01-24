@@ -1,0 +1,22 @@
+[
+    {
+        "name": "Ethereum",
+        "chainId": 1
+    },
+    {
+        "name": "BNB Smart Chain",
+        "chainId": 56
+    },
+    {
+        "name": "Polygon (Matic)",
+        "chainId": 137
+    },
+    {
+        "name": "Avalanche C-Chain",
+        "chainId": 43114
+    },
+    {
+        "name": "Fantom Opera",
+        "chainId": 250
+    }
+]
