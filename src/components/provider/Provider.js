@@ -3,8 +3,6 @@
 import { ThemeProvider } from '@/providers/theme-provider'
 import React from 'react'
 import { Toaster } from '../ui/toaster'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { WagmiProvider } from 'wagmi'
 import { config } from '@/lib/config'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'

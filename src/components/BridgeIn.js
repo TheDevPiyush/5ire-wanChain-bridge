@@ -4,64 +4,38 @@ import React, { useEffect, useState } from "react"
 import {
     Card,
     CardHeader,
-    CardTitle,
-    CardDescription,
     CardContent,
     CardFooter,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import chainOptions from "@/lib/chainOptions.json"
 import {
     DropdownSelection
 } from "./DropdownSelection"
-import { useAccount } from "wagmi"
+import { useAccount, useSwitchChain } from "wagmi"
 import { useToast } from "@/hooks/use-toast"
-import { usePathname } from "next/navigation"
-import Link from "next/link"
 import TabBar from "./TabBar"
 
 export default function BridgeInCard() {
     const [fromChain, setFromChain] = useState("")
-    const [toChain, setToChain] = useState("5ireChain")
+    const [toChain, setToChain] = useState("5ireChain Thunder Testnet")
     const [tokenAmount, setTokenAmount] = useState("")
-    const [selectedToken, setSelectedToken] = useState("USDC")
+    const [loading, setLoading] = useState(false);
 
-    const { isConnected, address, isDisconnected } = useAccount()
-
+    const { isConnected, address, isDisconnected, chain } = useAccount()
+    const { switchChainAsync } = useSwitchChain()
     const { toast } = useToast();
 
-    const handleFromChainSelect = (chainName) => {
-        setFromChain(chainName)
+    const handleFromChainSelect = async (chainName) => {
+        setLoading(true)
+        await switchChainAsync({ chainId: chainName.id })
+        setFromChain(chainName.name)
+        setLoading(false)
     }
-
-    const handleBridge = () => {
-        console.log("Bridging", tokenAmount, selectedToken, "from", fromChain, "to", toChain)
-    }
-
-    useEffect(() => {
-        if (isConnected && address)
-            toast({ title: address })
-
-        if (isDisconnected) toast({ title: "Wallet Disconnected 🛑" })
-    }, [isConnected, isDisconnected])
-
+    
     return (
         <Card
-            className="        
-            h-fit
-            mx-3
-            w-full 
-            max-w-md 
-            rounded-lg 
-            bg-card 
-            text-card-foreground 
-            p-3 
-            space-y-2
-            sm:max-w-lg 
-            md:max-w-xl 
-            lg:max-w-2xl"
-        >
+            className="h-fit mx-3 w-full max-w-md rounded-lg bg-card text-card-foreground p-3 space-y-2 sm:max-w-lg md:max-w-xl lg:max-w-2xl">
             <CardHeader >
                 <TabBar />
             </CardHeader>
@@ -71,15 +45,17 @@ export default function BridgeInCard() {
                 <div className="flex flex-col w-full">
                     <span className="mb-2 text-sm font-medium">From</span>
                     <DropdownSelection
+                        currentChain={chain}
+                        loading={loading}
                         disabled={false}
-                        options={chainOptions}
                         onSelect={handleFromChainSelect}
                     />
                 </div>
 
                 <div className="flex flex-col">
                     <span className="mb-2 text-sm font-medium">To</span>
-                    <div className="w-full p-4 bg-muted text-muted-foreground rounded-lg">
+                    <div className="flex gap-3 w-full p-4 bg-muted text-muted-foreground rounded-lg">
+                        <img className="w-[30px] rounded-full" src="https://s3.coinmarketcap.com/static-gravity/image/fd7a43cc620c4ade96804bb1c36aac6f.png" alt="" />
                         {toChain}
                     </div>
                 </div>
@@ -110,7 +86,7 @@ export default function BridgeInCard() {
                 <Button
                     className="w-full"
                     disabled={!fromChain || !toChain || !tokenAmount}
-                    onClick={handleBridge}
+                    onClick={() => { }}
                 >
                     Bridge In
                 </Button>

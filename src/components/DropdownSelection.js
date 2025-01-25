@@ -1,9 +1,8 @@
 "use client"
 
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 
-// Import these based on your project setup or UI library
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,13 +19,26 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 
-export function DropdownSelection({ options, onSelect, disabled }) {
-    const [open, setOpen] = React.useState(false)
-    const [name, setName] = React.useState("")
+import { useSwitchChain } from "wagmi"
+import { _5ireTestnet } from "@/lib/chainsConfigs"
 
-    const handleSelect = (selectedName) => {
-        setName((prev) => (selectedName === prev ? "" : selectedName))
-        setOpen(false)
+
+export function DropdownSelection({ onSelect, disabled, loading, currentChain }) {
+
+    const [open, setOpen] = useState(false)
+    const [name, setName] = useState("")
+    const [icon, setIcon] = useState("");
+    const { chains } = useSwitchChain();
+
+    useEffect(() => {
+        if (currentChain && currentChain?.id !== _5ireTestnet.id) setName(currentChain.name)
+    }, [currentChain])
+
+
+    const handleSelect = async (selectedName) => {
+        setName(selectedName.name);
+        setIcon(selectedName.icon);
+        setOpen(false);
         if (onSelect) {
             onSelect(selectedName)
         }
@@ -34,44 +46,50 @@ export function DropdownSelection({ options, onSelect, disabled }) {
 
     return (
         <Popover open={open} onOpenChange={setOpen} className="w-full">
+
             <PopoverTrigger asChild>
                 <Button
-                    disabled={disabled}
+                    disabled={disabled || loading}
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-full py-7 justify-between"
-                >
+                    className={`w-full py-7 justify-between ${loading ? "animate-pulse" : ""}`}>
                     {name
-                        ? options.find((option) => option.name === name)?.name
+                        ?
+                        <div className="flex gap-2 items-center">
+                            {<img className="w-[30px] rounded-full" src={icon && icon} alt="icon" />}
+                            {name}
+                        </div>
                         : "Select a network"}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
+
+            
             <PopoverContent className="p-0 bg-transparent backdrop-blur-md shadow-xl">
                 <Command className="bg-transparent">
                     <CommandInput className="w-[400px]" placeholder="Search networks..." />
                     <CommandList>
                         <CommandEmpty>No options found.</CommandEmpty>
                         <CommandGroup>
-                            {options.map((option) => (
-                                <CommandItem
-                                    className={`${name === option.name ? 'font-bold' : ''}`}
-                                    key={option.name}
-                                    name={option.name}
-                                    onSelect={() => handleSelect(option.name)}
-                                >
+                            {chains.map((chains) => (
+                                chains.id !== _5ireTestnet.id &&
+                                (<CommandItem
+                                    className={`${name === chains.name ? 'font-bold' : ''}`}
+                                    key={chains.name}
+                                    name={chains.name}
+                                    onSelect={() => handleSelect(chains)}>
                                     <Check
                                         className={cn(
                                             "mr-2 h-4 w-4",
-                                            name === option.name ? "opacity-100" : "opacity-0"
+                                            name === chains.name ? "opacity-100" : "opacity-0"
                                         )}
                                     />
                                     <div className="flex justify-center items-center gap-2">
-                                        <span><img className="w-[34px] rounded-full" src={option.iconUrl} alt="" /></span>
-                                        <span>{option.name}</span>
+                                        <span><img className="w-[30px] rounded-full" src={chains.icon} alt="" /> </span>
+                                        <span>{chains.name}</span>
                                     </div>
-                                </CommandItem>
+                                </CommandItem>)
                             ))}
                         </CommandGroup>
                     </CommandList>
