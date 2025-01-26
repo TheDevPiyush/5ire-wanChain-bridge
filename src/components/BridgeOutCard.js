@@ -4,15 +4,16 @@ import React, { useEffect, useState } from "react"
 import { Card, CardHeader, CardContent, CardFooter, } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { DropdownSelection } from "./DropdownSelection"
+import { DropdownSelection } from "./networkDropdown"
 import TabBar from "./TabBar"
-import { useAccount, useBalance, useReadContract, useSwitchChain, useWriteContract } from "wagmi"
+import { useAccount, useBalance, useReadContract, useSwitchChain, useTransactionReceipt, useWriteContract } from "wagmi"
 import { _5ireTestnet } from "@/lib/chainsConfigs"
 import { _5ireTestnetAddresses } from "@/lib/contractAddresses"
 import { formatEther, parseEther } from "viem"
 import { fireRouterAbi } from '@/lib/ABIs/FireRouter'
 import { FireHub } from "@/lib/ABIs/FireHub"
 import { useToast } from "@/hooks/use-toast"
+import { truncateAddress } from "./truncateAddress"
 
 export default function BridgeOutCard() {
 
@@ -51,6 +52,8 @@ export default function BridgeOutCard() {
         writeContractAsync: swapTokenFunction,
     } = useWriteContract();
 
+    const { data: swapTokenTx, isSuccess: swapTokenTxSuccess, isError: swapTokenTxError } = useTransactionReceipt({ hash: swapTokenData })
+
 
     // AUTOMATICALLY SWITCH USER TO 5IRECHAIN 
     const switchChain = async () => {
@@ -75,7 +78,7 @@ export default function BridgeOutCard() {
         setBridgeLoading(true)
         const srcSwapDetails = {
             sellToken: TOKEN_5IRE,
-            sellAmt: SwapTokenAmount,
+            sellAmt: parseEther(SwapTokenAmount),
             buyToken: TOKEN_5IRE,
             swapData: "0x"
         };
@@ -90,34 +93,46 @@ export default function BridgeOutCard() {
         let value = (parseEther(SwapTokenAmount) + BigInt(bridgeInfo.gasFee)).toString();
 
         try {
-            const hash = await swapTokenFunction({
+            await swapTokenFunction({
                 address: _5ireTestnetAddresses.FireHub,
                 abi: FireHub.abi,
                 functionName: "bridgeETH",
                 value: value,
                 args: [bridgeInfo]
             })
-            toast({
-                title: "Transaction Hash",
-                description: hash
-            })
         }
         catch (e) { console.log("Transaction Failed") }
     }
 
 
-    // ---------- CHECKING/ALERT FOR SUCCESSFULL OR FAILED TRANSACTIONS -------
+    // ---------- CHECKING/ALERT FOR FAILED TRANSACTIONS -------
     useEffect(() => {
         if (getFeeDataError) toast({ title: "Couldn't fetch Gas Fee ⛽" });
 
-        if (swapTokenSuccess) { toast({ title: "Transaction Successfull ✅" }); setBridgeLoading(false) }
+        if (swapTokenError) {
+            toast({ title: "Transaction Failed. Please try again. 🛑" });
+            setBridgeLoading(false)
+        }
 
-        if (swapTokenError) { toast({ title: "Transaction Failed. Please try again. 🛑" }); setBridgeLoading(false) }
-
-        if (swapTokenError && SwapTokenAmount.includes('.')) { toast({ title: "Please enter a integer value only. Avoid decimals" }); setBridgeLoading(false) }
-
+        if (swapTokenError && SwapTokenAmount.includes('.')) {
+            toast({ title: "Please enter a integer value only. Avoid decimals" });
+            setBridgeLoading(false)
+        }
     }, [getFeeData, getFeeDataError, swapTokenSuccess, swapTokenError])
 
+
+
+    // ---------- CHECKING/ALERT FOR SUCCESSFULL TRANSACTIONS -------
+    useEffect(() => {
+        if (swapTokenTx?.status === "reverted") {
+            toast({ title: "Transaction reverted due to technical issue 🔄️" });
+            setBridgeLoading(false);
+        }
+        else if (swapTokenTxSuccess && swapTokenSuccess) {
+            toast({ title: "Transaction Successfull ✅" });
+            setBridgeLoading(false);
+        }
+    }, [swapTokenTx, swapTokenTxSuccess, swapTokenTxError])
 
 
     // SWITCH TO 5IRECHAIN ON PAGE LOAD
@@ -181,16 +196,23 @@ export default function BridgeOutCard() {
                             MAX
                         </Button>
                     </div>
-                    <div className={`flex text-muted-foreground w-fit p-1 rounded-md text-sm 
+                    <div className="flex justify-between w-full">
+                        <div className={`flex text-muted-foreground w-fit p-1 rounded-md text-sm 
                         ${(getFeeDataLoading && !getFeeData) ? "animate-pulse" : ""}`}>
-                        Gas Fee :
-                        {
-                            getFeeData ?
-                                <span className="mx-2 font-semibold">
-                                    {(formatEther(getFeeData))} 5ire
-                                </span>
-                                :
-                                <span className="mx-2">...</span>
+                            Gas Fee :
+                            {
+                                getFeeData ?
+                                    <span className="mx-2 font-semibold">
+                                        {(formatEther(getFeeData))} 5ire
+                                    </span>
+                                    :
+                                    <span className="mx-2">...</span>
+                            }
+                        </div>
+                        {swapTokenTx &&
+                            <span className="text-muted-foreground"> Tx Hash : <a href={`https://testnet.5irescan.io/tx/${swapTokenTx?.transactionHash}`} target="_blank" className="text-primary underline underline-offset-4 font-mono">
+                                {truncateAddress(swapTokenTx?.transactionHash)}
+                            </a></span>
                         }
                     </div>
                 </div>
@@ -209,7 +231,7 @@ export default function BridgeOutCard() {
                                 <span>BRIDGING....</span>
                                 <span className="border-2 border-r-0 rounded-full font-bold animate-spin border-white w-7 h-7" ></span>
                             </>
-                            : <span className="font-bold text-base">BRIDGE IN</span>
+                            : <span className="font-bold text-base">BRIDGE OUT</span>
                     }
                 </Button>
             </CardFooter>

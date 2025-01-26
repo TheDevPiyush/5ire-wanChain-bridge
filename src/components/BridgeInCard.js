@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
     DropdownSelection
-} from "./DropdownSelection"
+} from "./networkDropdown"
 import { useAccount, useReadContract, useSwitchChain, useTransactionReceipt, useWriteContract } from "wagmi"
 import { useToast } from "@/hooks/use-toast"
 import TabBar from "./TabBar"
@@ -46,7 +46,7 @@ export default function BridgeInCard() {
 
     const { data: TxSwapTokenData, isSuccess: TxSwapTokenDataSuccess } = useTransactionReceipt({ hash: swapTokenData })
 
-    
+
     // ------- Get Approval for ERC-20--------------
     const {
         data: approveTokenData,
@@ -69,17 +69,17 @@ export default function BridgeInCard() {
         abi: fireRouterAbi.abi,
         address: AmoyPolygonTestnetAddresses.FireRouter,
         functionName: "estimateFee",
-        args: [1073741853, 500000]
+        args: [1073741853, 1000000]
     });
 
 
     // ---- CHECKING FOR SUCCESSFULL APPROVAL OF TRANSACTIONS ---
     useEffect(() => {
         if (approveSuccess && approveTx && approveTxSuccess) {
+            toast({ title: "Tokens Approved ✅" });
             startBridgeIn();
         }
     }, [approveSuccess, approveTxSuccess])
-
 
 
     // ----- CHECKING FOR SUCCESSFULL BRIDGE TRANSFER TRANSACTIONS -----
@@ -98,7 +98,7 @@ export default function BridgeInCard() {
             getFeeFetch;
         };
         if (approveError) {
-            toast({ title: "Approve Error" })
+            toast({ title: "Approve Transaction Failed 🛑" })
             setBridgeLoading({ loadingStatus: null })
         };
         if (swapTokenError) {
@@ -161,7 +161,7 @@ export default function BridgeInCard() {
         const bridgeInfo = {
             asset: TOKEN_5IRE,
             rmtChainId: "1073741853",
-            gasLimit: "500000",
+            gasLimit: "1000000",
             gasFee: getFeeData,
             receiver: address,
             swapDetails: srcSwapDetails

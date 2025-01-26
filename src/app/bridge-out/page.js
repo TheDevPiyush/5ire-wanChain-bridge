@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import BridgeOutCard from "@/components/BridgeOut"
+import BridgeOutCard from "@/components/BridgeOutCard"
 
 export default function page() {
 

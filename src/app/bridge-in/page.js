@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import BridgeInCard from "@/components/BridgeIn"
+import BridgeInCard from "@/components/BridgeInCard"
 
 export default function page() {
 
