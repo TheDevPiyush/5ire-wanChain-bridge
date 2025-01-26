@@ -85,7 +85,7 @@ export default function BridgeOutCard() {
         const bridgeInfo = {
             asset: WETH_TOKEN,
             rmtChainId: "2147484614",
-            gasLimit: "500000",
+            gasLimit: "1000000",
             gasFee: getFeeData,
             receiver: address,
             swapDetails: srcSwapDetails

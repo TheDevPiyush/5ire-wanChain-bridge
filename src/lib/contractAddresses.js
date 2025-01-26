@@ -12,6 +12,7 @@
 //     "GateWay": "0xDDddd58428706FEdD013b3A761c6E40723a7911d"
 // }
 
+
 export const _5ireTestnetAddresses = {
     "FireSwap": "0x9Ed931189bBBCDEB649A5093997220a2255C88A9",
     "FireRouter": "0xF69208C6DB09852b8dE930ae8Fb88d13152F2f7c",
