@@ -8,11 +8,10 @@ import { DropdownSelection } from "./DropdownSelection"
 import TabBar from "./TabBar"
 import { useAccount, useBalance, useReadContract, useSwitchChain, useWriteContract } from "wagmi"
 import { _5ireTestnet } from "@/lib/chainsConfigs"
-import { AmoyPolygonTestnetAddresses, _5ireTestnetAddresses } from "@/lib/contractAddresses"
+import { _5ireTestnetAddresses } from "@/lib/contractAddresses"
 import { formatEther, parseEther } from "viem"
 import { fireRouterAbi } from '@/lib/ABIs/FireRouter'
 import { FireHub } from "@/lib/ABIs/FireHub"
-import { FireSwap } from "@/lib/ABIs/FireSwap"
 import { useToast } from "@/hooks/use-toast"
 
 export default function BridgeOutCard() {
@@ -26,12 +25,8 @@ export default function BridgeOutCard() {
     const { switchChainAsync } = useSwitchChain();
     const { toast } = useToast();
 
-    const [SwapSellToken, setSwapSellToken] = useState('');
-    const [SwapBuyToken, setSwapBuyToken] = useState('');
-    const [bridgeAsset, setBridgeAsset] = useState('')
-
-    const TOKEN_5IRE_ON_POLYGON = "0x999A50941c934DF44b045Ab15e3Fb08e22607eC9";
-    const WETH_POLYGON = "0xCFaEB74409E4C6756C43F75455fc42A6A3FdEb1f";
+    const [TOKEN_5IRE, setTOKEN_5IRE] = useState('');
+    const [WETH_TOKEN, setWETH_TOKEN] = useState('')
 
 
     // Get the Gas Fee for BRIDGE OUT transaction -- 
@@ -47,6 +42,7 @@ export default function BridgeOutCard() {
         args: [2147484614, 500000]
     });
 
+
     // Swap the tokens from 5ireChain to Polygon
     const {
         data: swapTokenData,
@@ -56,7 +52,7 @@ export default function BridgeOutCard() {
     } = useWriteContract();
 
 
-
+    // AUTOMATICALLY SWITCH USER TO 5IRECHAIN 
     const switchChain = async () => {
         try {
             await switchChainAsync({ chainId: _5ireTestnet.id })
@@ -64,30 +60,33 @@ export default function BridgeOutCard() {
         catch (e) { console.log(e) }
     };
 
+
+    // SELECT CHAIN FROM THE DROPDOWN
     const handleToChainSelect = (chainName) => {
         setToChain(chainName)
     };
 
+
+    // MAIN BRIDGE TRANFER FUNCTION : FROM 5IRECHAIN TO OTHER CHAINS
     const handleBridgeOut = async () => {
 
-        if (!toChain || !SwapTokenAmount) return;
+        if (!toChain || !SwapTokenAmount || !getFeeData) return;
 
         setBridgeLoading(true)
         const srcSwapDetails = {
-            sellToken: SwapSellToken,
+            sellToken: TOKEN_5IRE,
             sellAmt: SwapTokenAmount,
-            buyToken: SwapBuyToken,
+            buyToken: TOKEN_5IRE,
             swapData: "0x"
         };
         const bridgeInfo = {
-            asset: bridgeAsset,
+            asset: WETH_TOKEN,
             rmtChainId: "2147484614",
             gasLimit: "500000",
             gasFee: getFeeData,
             receiver: address,
             swapDetails: srcSwapDetails
         };
-        // let value = (BigInt(parseEther(SwapTokenAmount)) + BigInt(bridgeInfo.gasFee)).toString();
         let value = (parseEther(SwapTokenAmount) + BigInt(bridgeInfo.gasFee)).toString();
 
         try {
@@ -106,15 +105,22 @@ export default function BridgeOutCard() {
         catch (e) { console.log("Transaction Failed") }
     }
 
+
+    // ---------- CHECKING/ALERT FOR SUCCESSFULL OR FAILED TRANSACTIONS -------
     useEffect(() => {
-        if (getFeeDataError) toast({ title: "Couldn't fetch Gas Fee ⛽", description: "There was a issue fetching the gas fee, please refresh to try again." });
+        if (getFeeDataError) toast({ title: "Couldn't fetch Gas Fee ⛽" });
 
         if (swapTokenSuccess) { toast({ title: "Transaction Successfull ✅" }); setBridgeLoading(false) }
+
         if (swapTokenError) { toast({ title: "Transaction Failed. Please try again. 🛑" }); setBridgeLoading(false) }
+
         if (swapTokenError && SwapTokenAmount.includes('.')) { toast({ title: "Please enter a integer value only. Avoid decimals" }); setBridgeLoading(false) }
+
     }, [getFeeData, getFeeDataError, swapTokenSuccess, swapTokenError])
 
 
+
+    // SWITCH TO 5IRECHAIN ON PAGE LOAD
     useEffect(() => {
         switchChain();
     }, [])
@@ -123,15 +129,12 @@ export default function BridgeOutCard() {
 
         if (toChain) {
             if (toChain.name === "Polygon Amoy") {
-                setSwapSellToken(TOKEN_5IRE_ON_POLYGON);
-                setSwapBuyToken(TOKEN_5IRE_ON_POLYGON);
-                setBridgeAsset(WETH_POLYGON);
+                setTOKEN_5IRE("0x999A50941c934DF44b045Ab15e3Fb08e22607eC9");
+                setWETH_TOKEN("0xCFaEB74409E4C6756C43F75455fc42A6A3FdEb1f");
             }
             else {
-                setSwapSellToken("");
-                setSwapBuyToken("");
-                setBridgeAsset("");
-
+                setTOKEN_5IRE("");
+                setWETH_TOKEN("");
             }
         }
 
@@ -183,8 +186,8 @@ export default function BridgeOutCard() {
                         Gas Fee :
                         {
                             getFeeData ?
-                                <span className="mx-2">
-                                    {Number(formatEther(getFeeData)).toFixed(2)} 5ire
+                                <span className="mx-2 font-semibold">
+                                    {(formatEther(getFeeData))} 5ire
                                 </span>
                                 :
                                 <span className="mx-2">...</span>
