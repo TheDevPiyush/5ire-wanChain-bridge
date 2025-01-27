@@ -91,6 +91,7 @@ export default function BridgeOutCard() {
         };
         let value = (parseEther(SwapTokenAmount) + BigInt(bridgeInfo.gasFee)).toString();
         console.log(bridgeInfo)
+        console.log(value)
         try {
             await swapTokenFunction({
                 address: _5ireTestnetAddresses.FireHub,
