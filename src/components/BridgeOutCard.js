@@ -40,7 +40,7 @@ export default function BridgeOutCard() {
         abi: fireRouterAbi.abi,
         address: _5ireTestnetAddresses.FireRouter,
         functionName: "estimateFee",
-        args: [2147484614, 500000]
+        args: [2147484614, 1000000]
     });
 
 
@@ -68,14 +68,13 @@ export default function BridgeOutCard() {
     const handleToChainSelect = (chainName) => {
         setToChain(chainName)
     };
-
-
     // MAIN BRIDGE TRANFER FUNCTION : FROM 5IRECHAIN TO OTHER CHAINS
     const handleBridgeOut = async () => {
 
         if (!toChain || !SwapTokenAmount || !getFeeData) return;
 
         setBridgeLoading(true)
+
         const srcSwapDetails = {
             sellToken: TOKEN_5IRE,
             sellAmt: parseEther(SwapTokenAmount),
@@ -91,7 +90,7 @@ export default function BridgeOutCard() {
             swapDetails: srcSwapDetails
         };
         let value = (parseEther(SwapTokenAmount) + BigInt(bridgeInfo.gasFee)).toString();
-
+        console.log(bridgeInfo)
         try {
             await swapTokenFunction({
                 address: _5ireTestnetAddresses.FireHub,
@@ -101,7 +100,9 @@ export default function BridgeOutCard() {
                 args: [bridgeInfo]
             })
         }
-        catch (e) { console.log("Transaction Failed") }
+        catch (e) {
+            console.log("Transaction Failed")
+        }
     }
 
 
