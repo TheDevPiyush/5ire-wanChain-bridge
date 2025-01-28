@@ -10,9 +10,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
-    DropdownSelection
+    NetworkDropdown
 } from "./networkDropdown"
-import { useAccount, useReadContract, useSwitchChain, useTransactionReceipt, useWriteContract } from "wagmi"
+import { useAccount, useBalance, useReadContract, useSwitchChain, useTransactionReceipt, useWriteContract } from "wagmi"
 import { useToast } from "@/hooks/use-toast"
 import TabBar from "./TabBar"
 import { fireRouterAbi } from "@/lib/ABIs/FireRouter"
@@ -21,20 +21,24 @@ import { formatEther, parseEther } from "viem"
 import { IERC20 } from "@/lib/ABIs/IERC20"
 import { FireHub } from "@/lib/ABIs/FireHub"
 import { _5ireTestnet } from "@/lib/chainsConfigs"
+import { CurrencyDropdown } from "./currencyDropdown"
+import { truncateAddress } from "./truncateAddress"
 
 export default function BridgeInCard() {
     const [fromChain, setFromChain] = useState("")
     const [toChain, setToChain] = useState("5ireChain Thunder Testnet")
-    const [tokenAmount, setTokenAmount] = useState("")
+    const [SwapTokenAmount, setSwapTokenAmount] = useState("")
     const [loading, setLoading] = useState(false);
-
     const [TOKEN_5IRE, setTOKEN_5IRE] = useState('');
     const [WETH_TOKEN, setWETH_TOKEN] = useState('')
+    const [bridgeLoading, setBridgeLoading] = useState({ loadingStatus: null })
+    const [currency, setCurrency] = useState("");
+
 
     const { isConnected, address, isDisconnected, chain } = useAccount()
     const { switchChainAsync } = useSwitchChain()
     const { toast } = useToast();
-    const [bridgeLoading, setBridgeLoading] = useState({ loadingStatus: null })
+    const { data: balance } = useBalance({ address: address });
 
     // Swap the tokens from 5ireChain to Polygon
     const {
@@ -94,7 +98,7 @@ export default function BridgeInCard() {
     // ---- CHECKING/ALERTING FOR ERROR IN TRANSACTIONS ---
     useEffect(() => {
         if (getFeeDataError) {
-            toast({ title: "Couldn't get latest Gas Fee. ⛽" });
+            toast({ title: "Couldn't fetch latest Gas Fee. ⛽", description: "Select a network to fetch gas fee." });
             getFeeFetch;
         };
         if (approveError) {
@@ -130,16 +134,23 @@ export default function BridgeInCard() {
     }
 
 
+    const handleCurrencySelect = async (currency) => {
+        setCurrency(currency)
+    }
+
+
     // ----- Approve the ERC20 contract -------
     const handleBridgeIn = async () => {
-        if (!getFeeData || !fromChain || !tokenAmount) return;
+        if (!getFeeData || !fromChain || !SwapTokenAmount || !currency) return;
+
         setBridgeLoading({ loadingStatus: "Approving Tokens...." })
+
         try {
             await approveTokenFunctionAsync({
                 abi: IERC20.abi,
                 functionName: "approve",
                 address: TOKEN_5IRE,
-                args: [AmoyPolygonTestnetAddresses.FireHub, parseEther(tokenAmount)],
+                args: [AmoyPolygonTestnetAddresses.FireHub, parseEther(SwapTokenAmount)],
             })
         }
         catch (e) {
@@ -154,7 +165,7 @@ export default function BridgeInCard() {
     const startBridgeIn = async () => {
         const srcSwapDetails = {
             sellToken: WETH_TOKEN,
-            sellAmt: parseEther(tokenAmount),
+            sellAmt: parseEther(SwapTokenAmount),
             buyToken: WETH_TOKEN,
             swapData: "0x"
         };
@@ -201,7 +212,7 @@ export default function BridgeInCard() {
 
                 <div className="flex flex-col w-full">
                     <span className="mb-2 text-sm font-medium">From</span>
-                    <DropdownSelection
+                    <NetworkDropdown
                         currentChain={chain}
                         loading={loading}
                         disabled={false}
@@ -217,41 +228,59 @@ export default function BridgeInCard() {
                     </div>
                 </div>
 
-                <div className="space-y-2">
-                    <span className="text-sm font-medium">
-                        Enter Amount
-                    </span>
-                    <div className="flex items-center gap-2">
-                        <Input
-                            type="number"
-                            value={tokenAmount}
-                            onChange={(e) => setTokenAmount(e.target.value)}
-                            placeholder="0.0"
-                            className="max-w-[100px] flex-1"
-                        />
-                        <Button variant="outline" size="lg" onClick={() => setTokenAmount("MAX")}>
-                            MAX
-                        </Button>
+                <div className="space-y-2 border-2 border-muted rounded-sm p-4 w-full">
+                    <div className="text-sm font-medium mb-4">
+                        Choose Currency & Enter Amount
                     </div>
-                    <div className={`flex text-muted-foreground w-fit p-1 rounded-md text-sm 
-                        ${(getFeeDataLoading && !getFeeData) ? "animate-pulse" : ""}`}>
-                        Gas Fee :
-                        {
-                            getFeeData ?
-                                <span className="mx-2 font-semibold">
-                                    {(formatEther(getFeeData))} ETH
-                                </span>
-                                :
-                                <span className="mx-2">...</span>
-                        }
+
+
+                    <div className="flex w-full justify-between gap-7">
+                        <div className="">
+                            <CurrencyDropdown
+                                loading={loading}
+                                disabled={false}
+                                onSelect={handleCurrencySelect} />
+                        </div>
+
+                        <div className="flex items-center justify-start gap-3">
+                            <Input
+                                type="number"
+                                value={SwapTokenAmount}
+                                onChange={(e) => setSwapTokenAmount(e.target.value)}
+                                placeholder="0.0"
+                                className="max-w-[100px] border-2 flex-1"
+                            />
+                            <Button variant="outline" size="lg" onClick={() => setSwapTokenAmount(Number(formatEther(balance.value)).toFixed(0))}>
+                                MAX
+                            </Button>
+                        </div>
                     </div>
                 </div>
+
+
+                <div className={`flex text-muted-foreground items-center w-fit p-1 rounded-md text-sm ${(getFeeDataLoading && !getFeeData) ? "animate-pulse" : ""}`}>
+                    Gas Fee :
+                    {
+                        getFeeData ?
+                            <span className="mx-2 text-white font-semibold">
+                                {(formatEther(getFeeData))} ETH
+                            </span>
+                            :
+                            <span className="mx-2 border-2 border-r-0 rounded-full flex items-center font-bold animate-spin border-white w-3 h-3" ></span>
+                    }
+                    {TxSwapTokenData &&
+                        <span className="text-muted-foreground"> Tx Hash : <a href={`https://testnet.5irescan.io/tx/${TxSwapTokenData?.transactionHash}`} target="_blank" className="text-primary underline underline-offset-4 font-mono">
+                            {truncateAddress(TxSwapTokenData?.transactionHash)}
+                        </a></span>
+                    }
+                </div>
+
             </CardContent>
 
             <CardFooter>
                 <Button
                     className="w-full"
-                    disabled={!fromChain || !toChain || !tokenAmount || bridgeLoading?.loadingStatus !== null}
+                    disabled={!fromChain || !toChain || !SwapTokenAmount || bridgeLoading?.loadingStatus !== null}
                     onClick={handleBridgeIn}
                 >
                     {

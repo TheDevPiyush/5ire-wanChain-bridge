@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react"
 import { Card, CardHeader, CardContent, CardFooter, } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { DropdownSelection } from "./networkDropdown"
+import { DropdownSelection, NetworkDropdown } from "./networkDropdown"
 import TabBar from "./TabBar"
 import { useAccount, useBalance, useReadContract, useSwitchChain, useTransactionReceipt, useWriteContract } from "wagmi"
 import { _5ireTestnet } from "@/lib/chainsConfigs"
@@ -14,12 +14,13 @@ import { fireRouterAbi } from '@/lib/ABIs/FireRouter'
 import { FireHub } from "@/lib/ABIs/FireHub"
 import { useToast } from "@/hooks/use-toast"
 import { truncateAddress } from "./truncateAddress"
+import { CurrencyDropdown } from "./currencyDropdown"
 
 export default function BridgeOutCard() {
 
     const [fromChain, setFromChain] = useState("5ireChain Thunder Testnet");
     const [toChain, setToChain] = useState("");
-    const [SwapTokenAmount, SwapTetTokenAmount] = useState("");
+    const [SwapTokenAmount, setSwapTokenAmount] = useState("");
     const [bridgeLoading, setBridgeLoading] = useState(false);
     const { address } = useAccount();
     const { data: balance } = useBalance({ address: address });
@@ -28,6 +29,7 @@ export default function BridgeOutCard() {
 
     const [TOKEN_5IRE, setTOKEN_5IRE] = useState('');
     const [WETH_TOKEN, setWETH_TOKEN] = useState('')
+    const [currency, setCurrency] = useState("");
 
 
     // Get the Gas Fee for BRIDGE OUT transaction -- 
@@ -68,10 +70,16 @@ export default function BridgeOutCard() {
     const handleToChainSelect = (chainName) => {
         setToChain(chainName)
     };
+
+    // SELECT CURRENCY FROM DROPDOWN
+    const handleCurrencySelect = async (currency) => {
+        setCurrency(currency)
+    }
+
     // MAIN BRIDGE TRANFER FUNCTION : FROM 5IRECHAIN TO OTHER CHAINS
     const handleBridgeOut = async () => {
 
-        if (!toChain || !SwapTokenAmount || !getFeeData) return;
+        if (!toChain || !SwapTokenAmount || !getFeeData || !currency) return;   
 
         setBridgeLoading(true)
 
@@ -176,47 +184,58 @@ export default function BridgeOutCard() {
 
                 <div className="flex flex-col">
                     <span className="mb-2 text-sm font-medium">To</span>
-                    <DropdownSelection
+                    <NetworkDropdown
                         disabled={false}
                         onSelect={handleToChainSelect}
                     />
                 </div>
 
-                <div className="space-y-2">
-                    <span className="text-sm font-medium">
-                        Enter Amount
-                    </span>
-                    <div className="flex items-center gap-2">
-                        <Input
-                            type="number"
-                            value={SwapTokenAmount}
-                            onChange={(e) => SwapTetTokenAmount(e.target.value)}
-                            placeholder="9"
-                            className="max-w-[100px] flex-1"
-                        />
-                        <Button variant="outline" size="lg" onClick={() => SwapTetTokenAmount(Number(formatEther(balance.value)).toFixed(0))}>
-                            MAX
-                        </Button>
+                <div className="space-y-2 border-2 border-muted rounded-sm p-4 w-full">
+                    <div className="text-sm font-medium mb-4">
+                        Choose Currency & Enter Amount
                     </div>
-                    <div className="flex justify-between w-full">
-                        <div className={`flex text-muted-foreground w-fit p-1 rounded-md text-sm 
-                        ${(getFeeDataLoading && !getFeeData) ? "animate-pulse" : ""}`}>
-                            Gas Fee :
-                            {
-                                getFeeData ?
-                                    <span className="mx-2 font-semibold">
-                                        {(formatEther(getFeeData))} 5ire
-                                    </span>
-                                    :
-                                    <span className="mx-2">...</span>
-                            }
+
+
+                    <div className="flex w-full justify-between gap-7">
+                        <div className="">
+                            <CurrencyDropdown
+                                disabled={false}
+                                onSelect={handleCurrencySelect} />
                         </div>
-                        {swapTokenTx &&
-                            <span className="text-muted-foreground"> Tx Hash : <a href={`https://testnet.5irescan.io/tx/${swapTokenTx?.transactionHash}`} target="_blank" className="text-primary underline underline-offset-4 font-mono">
-                                {truncateAddress(swapTokenTx?.transactionHash)}
-                            </a></span>
+
+                        <div className="flex items-center justify-start gap-3">
+                            <Input
+                                type="number"
+                                value={SwapTokenAmount}
+                                onChange={(e) => setSwapTokenAmount(e.target.value)}
+                                placeholder="0.0"
+                                className="max-w-[100px] border-2 flex-1"
+                            />
+                            <Button variant="outline" size="lg" onClick={() => setSwapTokenAmount(Number(formatEther(balance.value)).toFixed(0))}>
+                                MAX
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex justify-between w-full">
+                    <div className={`flex text-muted-foreground w-fit p-1 rounded-md text-sm 
+                        ${(getFeeDataLoading && !getFeeData) ? "animate-pulse" : ""}`}>
+                        Gas Fee :
+                        {
+                            getFeeData ?
+                                <span className="mx-2 font-semibold">
+                                    {(formatEther(getFeeData))} 5ire
+                                </span>
+                                :
+                                <span className="mx-2">...</span>
                         }
                     </div>
+                    {swapTokenTx &&
+                        <span className="text-muted-foreground"> Tx Hash : <a href={`https://testnet.5irescan.io/tx/${swapTokenTx?.transactionHash}`} target="_blank" className="text-primary underline underline-offset-4 font-mono">
+                            {truncateAddress(swapTokenTx?.transactionHash)}
+                        </a></span>
+                    }
                 </div>
             </CardContent>
 

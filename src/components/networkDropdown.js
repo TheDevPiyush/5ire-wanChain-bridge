@@ -23,7 +23,7 @@ import { useSwitchChain } from "wagmi"
 import { _5ireTestnet } from "@/lib/chainsConfigs"
 
 
-export function DropdownSelection({ onSelect, disabled, loading, currentChain }) {
+export function NetworkDropdown({ onSelect, disabled, loading, currentChain }) {
 
     const [open, setOpen] = useState(false)
     const [name, setName] = useState("")
@@ -65,7 +65,7 @@ export function DropdownSelection({ onSelect, disabled, loading, currentChain })
                 </Button>
             </PopoverTrigger>
 
-            
+
             <PopoverContent className="p-0 bg-transparent backdrop-blur-md shadow-xl">
                 <Command className="bg-transparent">
                     <CommandInput className="w-[400px]" placeholder="Search networks..." />
