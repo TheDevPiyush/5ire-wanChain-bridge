@@ -32,6 +32,7 @@ export function NetworkDropdown({ onSelect, disabled, loading, currentChain }) {
 
     useEffect(() => {
         if (currentChain && currentChain?.id !== _5ireTestnet.id) setName(currentChain.name)
+        if (currentChain && currentChain?.icon !== _5ireTestnet.id) setIcon(currentChain.icon)
     }, [currentChain])
 
 
