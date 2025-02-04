@@ -269,7 +269,7 @@ export default function BridgeInCard() {
                             <span className="mx-2 border-2 border-r-0 rounded-full flex items-center font-bold animate-spin border-white w-3 h-3" ></span>
                     }
                     {TxSwapTokenData &&
-                        <span className="text-muted-foreground"> Tx Hash : <a href={`https://testnet.5irescan.io/tx/${TxSwapTokenData?.transactionHash}`} target="_blank" className="text-primary underline underline-offset-4 font-mono">
+                        <span className="text-muted-foreground"> Tx Hash : <a href={`https://amoy.polygonscan.com/tx/${TxSwapTokenData?.transactionHash}`} target="_blank" className="text-primary underline underline-offset-4 font-mono">
                             {truncateAddress(TxSwapTokenData?.transactionHash)}
                         </a></span>
                     }
