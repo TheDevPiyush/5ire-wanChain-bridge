@@ -87,7 +87,7 @@ export default function BridgeOutCard() {
     const handleBridgeOut = async () => {
         console.log(toChain, TOKEN_5IRE, WETH_TOKEN, rmtChainId, getFeeData, currency, SwapTokenAmount)
         console.log("-----------------------------------------------------------")
-        if (!toChain || !SwapTokenAmount || !getFeeData || !currency) return;
+        if (!toChain || !SwapTokenAmount || !getFeeData || !currency || Number(SwapTokenAmount) <= 0) return;
 
         setBridgeLoading(true)
 

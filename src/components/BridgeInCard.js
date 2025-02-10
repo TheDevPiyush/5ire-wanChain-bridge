@@ -167,7 +167,7 @@ export default function BridgeInCard() {
 
     // ----- Approve the ERC20 5ire Tokens on other Chains-------
     const handleBridgeIn = async () => {
-        if (!getFeeData || !fromChain || !SwapTokenAmount || !currency) return;
+        if (!getFeeData || !fromChain || !SwapTokenAmount || !currency || Number(SwapTokenAmount) <= 0) return;
 
         setBridgeLoading({ loadingStatus: "Approving Tokens...." })
 
