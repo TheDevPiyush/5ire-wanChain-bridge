@@ -61,6 +61,12 @@ export default function BridgeOutCard() {
     // AUTOMATICALLY SWITCH USER TO 5IRECHAIN 
     const switchChain = async () => {
         try {
+            setTimeout(() => {
+                toast({
+                    title: "Please Wait",
+                    description: "Switching to 5ireChain..."
+                })
+            }, 1500);
             await switchChainAsync({ chainId: _5ireTestnet.id })
         }
         catch (e) { console.log(e) }
@@ -79,7 +85,7 @@ export default function BridgeOutCard() {
 
     // MAIN BRIDGE TRANFER FUNCTION : FROM 5IRECHAIN TO OTHER CHAINS
     const handleBridgeOut = async () => {
-        console.log(toChain, TOKEN_5IRE, WETH_TOKEN,rmtChainId, getFeeData, currency, SwapTokenAmount)
+        console.log(toChain, TOKEN_5IRE, WETH_TOKEN, rmtChainId, getFeeData, currency, SwapTokenAmount)
         console.log("-----------------------------------------------------------")
         if (!toChain || !SwapTokenAmount || !getFeeData || !currency) return;
 
@@ -120,7 +126,7 @@ export default function BridgeOutCard() {
     // ---------- CHECKING/ALERT FOR FAILED TRANSACTIONS -------
     useEffect(() => {
         if (getFeeData) console.log(getFeeData);
-        if (getFeeDataError) toast({ title: "Couldn't fetch Gas Fee ⛽" });
+        if (getFeeDataError) toast({ title: "Couldn't fetch Gas Fee ⛽", description: "Try to switch to 5ireChain network." });
 
         if (swapTokenError) {
             toast({ title: "Transaction Failed. Please try again. 🛑" });
@@ -182,15 +188,15 @@ export default function BridgeOutCard() {
             <CardContent className="space-y-6">
 
                 <div className="flex flex-col w-full">
-                    <span className="mb-2 text-sm font-medium">From</span>
-                    <div className="flex gap-3 w-full p-4 bg-muted text-muted-foreground rounded-lg">
+                    <span className="mb-2 text-base font-medium">From</span>
+                    <div className="flex gap-3 w-full p-4 bg-muted text-muted-foreground font-bold rounded-lg">
                         <img className="w-[30px] rounded-full" src="https://s3.coinmarketcap.com/static-gravity/image/fd7a43cc620c4ade96804bb1c36aac6f.png" alt="" />
                         {fromChain}
                     </div>
                 </div>
 
                 <div className="flex flex-col">
-                    <span className="mb-2 text-sm font-medium">To</span>
+                    <span className="mb-2 text-base font-medium">To</span>
                     <NetworkDropdown
                         disabled={false}
                         onSelect={handleToChainSelect}
@@ -198,8 +204,19 @@ export default function BridgeOutCard() {
                 </div>
 
                 <div className="space-y-2 border-2 border-muted rounded-sm p-4 w-full">
-                    <div className="text-sm font-medium mb-4">
+                    <div className="text-base font-medium mb-4 flex justify-between w-full">
                         Choose Currency & Enter Amount
+                        <span>
+                            {
+                                balance &&
+                                <div className="text-muted-foreground text-sm w-full">
+                                    <span>Balance : </span>
+                                    <span className="text-secondary-foreground font-bold">
+                                        {Number(formatEther(balance?.value)).toFixed(0)} {balance?.symbol}
+                                    </span>
+                                </div>
+                            }
+                        </span>
                     </div>
 
 

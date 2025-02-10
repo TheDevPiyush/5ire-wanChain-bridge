@@ -25,22 +25,22 @@ import { CurrencyDropdown } from "./currencyDropdown"
 import { truncateAddress } from "./truncateAddress"
 
 export default function BridgeInCard() {
-    const [fromChain, setFromChain] = useState("")
-    const [toChain, setToChain] = useState("5ireChain Thunder Testnet")
-    const [SwapTokenAmount, setSwapTokenAmount] = useState("")
+    const [fromChain, setFromChain] = useState("");
+    const [toChain, setToChain] = useState("5ireChain Thunder Testnet");
+    const [SwapTokenAmount, setSwapTokenAmount] = useState("");
     const [loading, setLoading] = useState(false);
     const [TOKEN_5IRE, setTOKEN_5IRE] = useState('');
     const [WETH_TOKEN, setWETH_TOKEN] = useState('');
     const [chainConfigs, setchainConfigs] = useState({ fireRouter: "", chainID: "", firehub: "" });
-    const [bridgeLoading, setBridgeLoading] = useState({ loadingStatus: null })
+    const [bridgeLoading, setBridgeLoading] = useState({ loadingStatus: null });
     const [currency, setCurrency] = useState("");
     const [explorerURL, setExplorerURL] = useState("");
     const [txHash, setTxHash] = useState("");
 
-    const { isConnected, address, isDisconnected, chain } = useAccount()
-    const { switchChainAsync } = useSwitchChain()
+    const { isConnected, address, isDisconnected, chain } = useAccount();
+    const { switchChainAsync } = useSwitchChain();
     const { toast } = useToast();
-    const { data: balance } = useBalance({ address: address });
+    const { data: balance } = useBalance({ address: address, token: "0x999A50941c934DF44b045Ab15e3Fb08e22607eC9" });
 
     // Swap the tokens from 5ireChain to Polygon
     const {
@@ -237,9 +237,9 @@ export default function BridgeInCard() {
             <CardContent className="space-y-6">
 
                 <div className="flex flex-col w-full">
-                    <span className="mb-2 text-sm font-medium">From</span>
+                    <span className="mb-2 text-base">From</span>
                     <NetworkDropdown
-                        currentChain={chain}
+                        currentChain={fromChain}
                         loading={loading}
                         disabled={false}
                         onSelect={handleFromChainSelect}
@@ -247,21 +247,32 @@ export default function BridgeInCard() {
                 </div>
 
                 <div className="flex flex-col">
-                    <span className="mb-2 text-sm font-medium">To</span>
+                    <span className="mb-2 text-base font-medium">To</span>
                     <div className="flex gap-3 w-full p-4 bg-muted text-muted-foreground rounded-lg">
                         {/* <img className="w-[30px] rounded-full" src={"https://s3.coinmarketcap.com/static-gravity/image/fd7a43cc620c4ade96804bb1c36aac6f.png" || null} alt="logoIcon" /> */}
                         {toChain}
                     </div>
                 </div>
 
-                <div className="space-y-2 border-2 border-muted rounded-sm p-4 w-full">
-                    <div className="text-sm font-medium mb-4">
+                <div className="space-y-2 border-2 border-muted gap-3 flex flex-col rounded-sm p-4 w-full">
+                    <div className="text-base flex w-full justify-between font-medium">
                         Choose Currency & Enter Amount
+                        <span>
+                            {
+                                balance &&
+                                <div className="text-muted-foreground text-sm w-full">
+                                    <span>Balance : </span>
+                                    <span className="text-secondary-foreground font-bold">
+                                        {Number(formatEther(balance?.value)).toFixed(0)} {balance?.symbol}
+                                    </span>
+                                </div>
+                            }
+                        </span>
                     </div>
 
 
-                    <div className="flex w-full justify-between gap-7">
-                        <div className="">
+                    <div className="flex w-full justify-between">
+                        <div>
                             <CurrencyDropdown
                                 loading={loading}
                                 disabled={false}
@@ -283,10 +294,8 @@ export default function BridgeInCard() {
                     </div>
                 </div>
 
-
-                {<div className={`flex text-muted-foreground  justify-between w-full items-center p-1 rounded-md text-sm ${(getFeeDataLoading && !getFeeData) ? "animate-pulse" : ""}`}>
+                {fromChain && <div className={`flex text-muted-foreground  justify-between w-full items-center p-1 rounded-md text-sm ${(getFeeDataLoading && !getFeeData) ? "animate-pulse" : ""}`}>
                     <div className="flex items-center justify-center gap-2">
-
                         Gas Fee :
                         {
                             getFeeData ?
@@ -303,7 +312,6 @@ export default function BridgeInCard() {
                         </a></span>
                     }
                 </div>}
-
             </CardContent>
 
             <CardFooter>

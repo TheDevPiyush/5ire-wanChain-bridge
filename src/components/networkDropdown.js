@@ -48,13 +48,13 @@ export function NetworkDropdown({ onSelect, disabled, loading, currentChain }) {
     return (
         <Popover open={open} onOpenChange={setOpen} className="w-full">
 
-            <PopoverTrigger asChild>
+            <PopoverTrigger asChild className={`${loading ? "animate-pulse" : ""}`}>
                 <Button
                     disabled={disabled || loading}
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className={`w-full py-7 justify-between ${loading ? "animate-pulse" : ""}`}>
+                    className={`w-full py-7 justify-between`}>
                     {name
                         ?
                         <div className="flex gap-2 items-center">

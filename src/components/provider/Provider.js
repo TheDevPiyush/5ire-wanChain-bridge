@@ -36,7 +36,7 @@ export default function Provider({ children }) {
                                         }}
                                         showBalance={{
                                             smallScreen: false,
-                                            largeScreen: true
+                                            largeScreen: false
                                         }}
                                         accountStatus={{
                                             smallScreen: 'avatar',
