@@ -16,7 +16,7 @@ import { useAccount, useBalance, useReadContract, useSwitchChain, useTransaction
 import { useToast } from "@/hooks/use-toast"
 import TabBar from "./TabBar"
 import { fireRouterAbi } from "@/lib/ABIs/FireRouter"
-import { _5ireTestnetAddresses, AmoyPolygonTestnetAddresses } from "@/lib/contractAddresses"
+import { _5ireTestnetAddresses, AmoyPolygonTestnetAddresses, SepoliaETHAddresses } from "@/lib/contractAddresses"
 import { formatEther, parseEther } from "viem"
 import { IERC20 } from "@/lib/ABIs/IERC20"
 import { FireHub } from "@/lib/ABIs/FireHub"
@@ -30,10 +30,12 @@ export default function BridgeInCard() {
     const [SwapTokenAmount, setSwapTokenAmount] = useState("")
     const [loading, setLoading] = useState(false);
     const [TOKEN_5IRE, setTOKEN_5IRE] = useState('');
-    const [WETH_TOKEN, setWETH_TOKEN] = useState('')
+    const [WETH_TOKEN, setWETH_TOKEN] = useState('');
+    const [chainConfigs, setchainConfigs] = useState({ fireRouter: "", chainID: "", firehub: "" });
     const [bridgeLoading, setBridgeLoading] = useState({ loadingStatus: null })
     const [currency, setCurrency] = useState("");
-
+    const [explorerURL, setExplorerURL] = useState("");
+    const [txHash, setTxHash] = useState("");
 
     const { isConnected, address, isDisconnected, chain } = useAccount()
     const { switchChainAsync } = useSwitchChain()
@@ -68,18 +70,19 @@ export default function BridgeInCard() {
         isSuccess: getFeeDataSuccess,
         isError: getFeeDataError,
         isLoading: getFeeDataLoading,
-        refetch: getFeeFetch
+        refetch: getFeeFetch,
+
     } = useReadContract({
         abi: fireRouterAbi.abi,
-        address: AmoyPolygonTestnetAddresses.FireRouter,
+        address: chainConfigs.fireRouter,
         functionName: "estimateFee",
-        args: [1073741853, 1000000]
+        args: [chainConfigs.chainID, 1000000]
     });
 
 
     // ---- CHECKING FOR SUCCESSFULL APPROVAL OF TRANSACTIONS ---
     useEffect(() => {
-        if (approveSuccess && approveTx && approveTxSuccess) {
+        if (approveSuccess) {
             toast({ title: "Tokens Approved ✅" });
             startBridgeIn();
         }
@@ -91,13 +94,14 @@ export default function BridgeInCard() {
         if (swapTokenSuccess && TxSwapTokenData && TxSwapTokenDataSuccess) {
             toast({ title: "BRIDGE Transaction Successfull ✅" });
             setBridgeLoading({ loadingStatus: null })
+            setTxHash(TxSwapTokenData?.transactionHash)
         }
     }, [TxSwapTokenData, TxSwapTokenDataSuccess])
 
 
     // ---- CHECKING/ALERTING FOR ERROR IN TRANSACTIONS ---
     useEffect(() => {
-        if (getFeeDataError) {
+        if (getFeeDataError && fromChain) {
             toast({ title: "Couldn't fetch latest Gas Fee. ⛽", description: "Select a network to fetch gas fee." });
             getFeeFetch;
         };
@@ -112,16 +116,6 @@ export default function BridgeInCard() {
     }, [getFeeDataError, approveError, swapTokenError])
 
 
-    // ----- SETTING PARAMETERS BASED ON SELECTED CHAIN -----
-    useEffect(() => {
-        if (fromChain) {
-            if (fromChain.name === "Polygon Amoy") {
-                setTOKEN_5IRE("0x999A50941c934DF44b045Ab15e3Fb08e22607eC9");
-                setWETH_TOKEN("0xCFaEB74409E4C6756C43F75455fc42A6A3FdEb1f");
-            }
-            else { setTOKEN_5IRE(""); setWETH_TOKEN(""); }
-        }
-    }, [fromChain])
 
 
     // ---- SELETING CHAIN FROM DROPDOWN -----
@@ -133,13 +127,45 @@ export default function BridgeInCard() {
         getFeeFetch;
     }
 
+    // ----- SETTING PARAMETERS BASED ON SELECTED CHAIN -----
+    useEffect(() => {
+        if (fromChain) {
+            if (fromChain.name === "Polygon Amoy") {
+                setTOKEN_5IRE(AmoyPolygonTestnetAddresses.Token5IRE);
+                setchainConfigs({
+                    fireRouter: AmoyPolygonTestnetAddresses.FireRouter,
+                    chainID: AmoyPolygonTestnetAddresses.ChainId,
+                    firehub: AmoyPolygonTestnetAddresses.FireHub
+                })
+                setWETH_TOKEN(_5ireTestnetAddresses.WETH);
+                setExplorerURL(`https://amoy.polygonscan.com/tx/${txHash}`)
+                console.log('amoy')
+            }
+            else if (fromChain.name === "Sepolia Testnet") {
+                setTOKEN_5IRE(SepoliaETHAddresses.Token5IRE);
+                setchainConfigs({
+                    fireRouter: SepoliaETHAddresses.FireRouter,
+                    chainID: SepoliaETHAddresses.ChainId,
+                    firehub: SepoliaETHAddresses.FireHub
+                });
+                setWETH_TOKEN(_5ireTestnetAddresses.WETH);
+                setExplorerURL(`https://sepolia.etherscan.io/tx/${txHash}`)
+                console.log('sepolia')
 
+            }
+            else { setTOKEN_5IRE(""); setWETH_TOKEN(""); }
+        }
+    }, [fromChain])
+
+
+
+    //   SELECTING CURRENCY FROM THE DROPDOWN -------------
     const handleCurrencySelect = async (currency) => {
         setCurrency(currency)
     }
 
 
-    // ----- Approve the ERC20 contract -------
+    // ----- Approve the ERC20 5ire Tokens on other Chains-------
     const handleBridgeIn = async () => {
         if (!getFeeData || !fromChain || !SwapTokenAmount || !currency) return;
 
@@ -150,7 +176,7 @@ export default function BridgeInCard() {
                 abi: IERC20.abi,
                 functionName: "approve",
                 address: TOKEN_5IRE,
-                args: [AmoyPolygonTestnetAddresses.FireHub, parseEther(SwapTokenAmount)],
+                args: [chainConfigs.firehub, parseEther(SwapTokenAmount)],
             })
         }
         catch (e) {
@@ -181,7 +207,7 @@ export default function BridgeInCard() {
         try {
             setBridgeLoading({ loadingStatus: "BRIDGING...." })
             const hash = await swapTokenFunction({
-                address: AmoyPolygonTestnetAddresses.FireHub,
+                address: chainConfigs.firehub,
                 abi: FireHub.abi,
                 functionName: "bridgeETH",
                 value: value,
@@ -203,7 +229,7 @@ export default function BridgeInCard() {
 
     return (
         <Card
-            className="h-fit mx-3 w-full max-w-md rounded-lg bg-card text-card-foreground p-3 space-y-2 sm:max-w-lg md:max-w-xl lg:max-w-2xl">
+            className="h-fit transition-all mx-3 w-full max-w-md rounded-lg bg-card text-card-foreground p-3 space-y-2 sm:max-w-lg md:max-w-xl lg:max-w-2xl">
             <CardHeader >
                 <TabBar />
             </CardHeader>
@@ -258,22 +284,25 @@ export default function BridgeInCard() {
                 </div>
 
 
-                <div className={`flex text-muted-foreground items-center w-fit p-1 rounded-md text-sm ${(getFeeDataLoading && !getFeeData) ? "animate-pulse" : ""}`}>
-                    Gas Fee :
-                    {
-                        getFeeData ?
-                            <span className="mx-2 text-white font-semibold">
-                                {(formatEther(getFeeData))} ETH
-                            </span>
-                            :
-                            <span className="mx-2 border-2 border-r-0 rounded-full flex items-center font-bold animate-spin border-white w-3 h-3" ></span>
-                    }
+                {<div className={`flex text-muted-foreground  justify-between w-full items-center p-1 rounded-md text-sm ${(getFeeDataLoading && !getFeeData) ? "animate-pulse" : ""}`}>
+                    <div className="flex items-center justify-center gap-2">
+
+                        Gas Fee :
+                        {
+                            getFeeData ?
+                                <span className="mx-2 text-white font-semibold">
+                                    {(formatEther(getFeeData))} ETH
+                                </span>
+                                :
+                                <span className="mx-2 border-2 border-r-0 rounded-full flex items-center font-bold animate-spin border-white w-3 h-3" ></span>
+                        }
+                    </div>
                     {TxSwapTokenData &&
-                        <span className="text-muted-foreground"> Tx Hash : <a href={`https://amoy.polygonscan.com/tx/${TxSwapTokenData?.transactionHash}`} target="_blank" className="text-primary underline underline-offset-4 font-mono">
+                        <span className="text-muted-foreground"> Tx Hash : <a href={explorerURL} target="_blank" className="text-primary underline underline-offset-4 font-mono">
                             {truncateAddress(TxSwapTokenData?.transactionHash)}
                         </a></span>
                     }
-                </div>
+                </div>}
 
             </CardContent>
 

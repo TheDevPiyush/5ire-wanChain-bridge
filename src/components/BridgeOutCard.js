@@ -8,7 +8,7 @@ import { DropdownSelection, NetworkDropdown } from "./networkDropdown"
 import TabBar from "./TabBar"
 import { useAccount, useBalance, useReadContract, useSwitchChain, useTransactionReceipt, useWriteContract } from "wagmi"
 import { _5ireTestnet } from "@/lib/chainsConfigs"
-import { _5ireTestnetAddresses } from "@/lib/contractAddresses"
+import { _5ireTestnetAddresses, AmoyPolygonTestnetAddresses, SepoliaETHAddresses } from "@/lib/contractAddresses"
 import { formatEther, parseEther } from "viem"
 import { fireRouterAbi } from '@/lib/ABIs/FireRouter'
 import { FireHub } from "@/lib/ABIs/FireHub"
@@ -30,6 +30,7 @@ export default function BridgeOutCard() {
     const [TOKEN_5IRE, setTOKEN_5IRE] = useState('');
     const [WETH_TOKEN, setWETH_TOKEN] = useState('')
     const [currency, setCurrency] = useState("");
+    const [rmtChainId, setRmtChainId] = useState("")
 
 
     // Get the Gas Fee for BRIDGE OUT transaction -- 
@@ -42,7 +43,7 @@ export default function BridgeOutCard() {
         abi: fireRouterAbi.abi,
         address: _5ireTestnetAddresses.FireRouter,
         functionName: "estimateFee",
-        args: [2147484614, 1000000]
+        args: [_5ireTestnetAddresses.ChainId, 1000000]
     });
 
 
@@ -78,8 +79,9 @@ export default function BridgeOutCard() {
 
     // MAIN BRIDGE TRANFER FUNCTION : FROM 5IRECHAIN TO OTHER CHAINS
     const handleBridgeOut = async () => {
-
-        if (!toChain || !SwapTokenAmount || !getFeeData || !currency) return;   
+        console.log(toChain, TOKEN_5IRE, WETH_TOKEN,rmtChainId, getFeeData, currency, SwapTokenAmount)
+        console.log("-----------------------------------------------------------")
+        if (!toChain || !SwapTokenAmount || !getFeeData || !currency) return;
 
         setBridgeLoading(true)
 
@@ -91,15 +93,15 @@ export default function BridgeOutCard() {
         };
         const bridgeInfo = {
             asset: WETH_TOKEN,
-            rmtChainId: "2147484614",
+            rmtChainId: rmtChainId,
             gasLimit: "1000000",
             gasFee: getFeeData,
             receiver: address,
             swapDetails: srcSwapDetails
         };
         let value = (parseEther(SwapTokenAmount) + BigInt(bridgeInfo.gasFee)).toString();
-        console.log(bridgeInfo)
         console.log(value)
+        console.log(bridgeInfo)
         try {
             await swapTokenFunction({
                 address: _5ireTestnetAddresses.FireHub,
@@ -117,6 +119,7 @@ export default function BridgeOutCard() {
 
     // ---------- CHECKING/ALERT FOR FAILED TRANSACTIONS -------
     useEffect(() => {
+        if (getFeeData) console.log(getFeeData);
         if (getFeeDataError) toast({ title: "Couldn't fetch Gas Fee ⛽" });
 
         if (swapTokenError) {
@@ -137,6 +140,7 @@ export default function BridgeOutCard() {
         if (swapTokenTx?.status === "reverted") {
             toast({ title: "Transaction reverted due to technical issue 🔄️" });
             setBridgeLoading(false);
+            console.log(swapTokenTx);
         }
         else if (swapTokenTxSuccess && swapTokenSuccess) {
             toast({ title: "Transaction Successfull ✅" });
@@ -154,13 +158,16 @@ export default function BridgeOutCard() {
 
         if (toChain) {
             if (toChain.name === "Polygon Amoy") {
-                setTOKEN_5IRE("0x999A50941c934DF44b045Ab15e3Fb08e22607eC9");
-                setWETH_TOKEN("0xCFaEB74409E4C6756C43F75455fc42A6A3FdEb1f");
+                setTOKEN_5IRE(AmoyPolygonTestnetAddresses.Token5IRE);
+                setWETH_TOKEN(_5ireTestnetAddresses.WETH);
+                setRmtChainId(AmoyPolygonTestnetAddresses.ChainId)
             }
-            else {
-                setTOKEN_5IRE("");
-                setWETH_TOKEN("");
+            else if (toChain.name === "Sepolia Testnet") {
+                setTOKEN_5IRE(SepoliaETHAddresses.Token5IRE);
+                setWETH_TOKEN(_5ireTestnetAddresses.WETH)
+                setRmtChainId(SepoliaETHAddresses.ChainId)
             }
+            else { setTOKEN_5IRE(""); setWETH_TOKEN(""); }
         }
 
     }, [toChain])
@@ -242,7 +249,7 @@ export default function BridgeOutCard() {
             <CardFooter>
                 <Button
                     className="w-full flex justify-center items-center gap-3"
-                    disabled={!fromChain || !toChain || !SwapTokenAmount || bridgeLoading}
+                    disabled={!fromChain || !toChain || !SwapTokenAmount || bridgeLoading || !rmtChainId}
                     onClick={handleBridgeOut}
                 >
                     {
