@@ -43,7 +43,7 @@ export default function BridgeOutCard() {
         abi: fireRouterAbi.abi,
         address: _5ireTestnetAddresses.FireRouter,
         functionName: "estimateFee",
-        args: [_5ireTestnetAddresses.ChainId, 1000000]
+        args: [rmtChainId, 1000000]
     });
 
 
@@ -85,8 +85,6 @@ export default function BridgeOutCard() {
 
     // MAIN BRIDGE TRANFER FUNCTION : FROM 5IRECHAIN TO OTHER CHAINS
     const handleBridgeOut = async () => {
-        console.log(toChain, TOKEN_5IRE, WETH_TOKEN, rmtChainId, getFeeData, currency, SwapTokenAmount, address)
-        console.log("-----------------------------------------------------------")
         if (!toChain || !SwapTokenAmount || !getFeeData || !currency) return;
         if (Number(SwapTokenAmount) <= 0 || SwapTokenAmount.includes('.')) { toast({ title: "Amount can only be positive Integer" }); return; }
 

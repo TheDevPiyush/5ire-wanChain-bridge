@@ -76,7 +76,7 @@ export default function BridgeInCard() {
         abi: fireRouterAbi.abi,
         address: chainConfigs.fireRouter,
         functionName: "estimateFee",
-        args: [chainConfigs.chainID, 1000000]
+        args: [_5ireTestnetAddresses.ChainId, 1000000]
     });
 
 
@@ -96,7 +96,7 @@ export default function BridgeInCard() {
             setBridgeLoading({ loadingStatus: null })
             setTxHash(TxSwapTokenData?.transactionHash)
         }
-    }, [TxSwapTokenData, TxSwapTokenDataSuccess])
+    }, [TxSwapTokenData, TxSwapTokenDataSuccess, swapTokenSuccess])
 
 
     // ---- CHECKING/ALERTING FOR ERROR IN TRANSACTIONS ---
@@ -138,7 +138,7 @@ export default function BridgeInCard() {
                     firehub: AmoyPolygonTestnetAddresses.FireHub
                 })
                 setWETH_TOKEN(_5ireTestnetAddresses.WETH);
-                setExplorerURL(`https://amoy.polygonscan.com/tx/${txHash}`)
+                setExplorerURL(`https://amoy.polygonscan.com/tx/`)
                 console.log('amoy')
             }
             else if (fromChain.name === "Sepolia Testnet") {
@@ -149,7 +149,7 @@ export default function BridgeInCard() {
                     firehub: SepoliaETHAddresses.FireHub
                 });
                 setWETH_TOKEN(_5ireTestnetAddresses.WETH);
-                setExplorerURL(`https://sepolia.etherscan.io/tx/${txHash}`)
+                setExplorerURL(`https://sepolia.etherscan.io/tx/`)
                 console.log('sepolia')
 
             }
@@ -172,7 +172,7 @@ export default function BridgeInCard() {
 
         setBridgeLoading({ loadingStatus: "Approving Tokens...." })
 
-        try {   
+        try {
             await approveTokenFunctionAsync({
                 abi: IERC20.abi,
                 functionName: "approve",
@@ -198,7 +198,7 @@ export default function BridgeInCard() {
         };
         const bridgeInfo = {
             asset: TOKEN_5IRE,
-            rmtChainId: "1073741853",
+            rmtChainId: _5ireTestnetAddresses.ChainId,
             gasLimit: "1000000",
             gasFee: getFeeData,
             receiver: address,
@@ -308,7 +308,7 @@ export default function BridgeInCard() {
                         }
                     </div>
                     {TxSwapTokenData &&
-                        <span className="text-muted-foreground"> Tx Hash : <a href={explorerURL} target="_blank" className="text-primary underline underline-offset-4 font-mono">
+                        <span className="text-muted-foreground"> Tx Hash : <a href={explorerURL + txHash} target="_blank" className="text-primary underline underline-offset-4 font-mono">
                             {truncateAddress(TxSwapTokenData?.transactionHash)}
                         </a></span>
                     }
