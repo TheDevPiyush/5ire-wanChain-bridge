@@ -167,11 +167,12 @@ export default function BridgeInCard() {
 
     // ----- Approve the ERC20 5ire Tokens on other Chains-------
     const handleBridgeIn = async () => {
-        if (!getFeeData || !fromChain || !SwapTokenAmount || !currency || Number(SwapTokenAmount) <= 0) return;
+        if (!getFeeData || !fromChain || !SwapTokenAmount || !currency) return;
+        if (Number(SwapTokenAmount) <= 0 || SwapTokenAmount.includes('.')) { toast({ title: "Amount can only be positive Integer" }); return; }
 
         setBridgeLoading({ loadingStatus: "Approving Tokens...." })
 
-        try {
+        try {   
             await approveTokenFunctionAsync({
                 abi: IERC20.abi,
                 functionName: "approve",

@@ -22,7 +22,7 @@ export default function BridgeOutCard() {
     const [toChain, setToChain] = useState("");
     const [SwapTokenAmount, setSwapTokenAmount] = useState("");
     const [bridgeLoading, setBridgeLoading] = useState(false);
-    const { address } = useAccount();
+    const { address, isConnected, isDisconnected } = useAccount();
     const { data: balance } = useBalance({ address: address });
     const { switchChainAsync } = useSwitchChain();
     const { toast } = useToast();
@@ -85,9 +85,10 @@ export default function BridgeOutCard() {
 
     // MAIN BRIDGE TRANFER FUNCTION : FROM 5IRECHAIN TO OTHER CHAINS
     const handleBridgeOut = async () => {
-        console.log(toChain, TOKEN_5IRE, WETH_TOKEN, rmtChainId, getFeeData, currency, SwapTokenAmount)
+        console.log(toChain, TOKEN_5IRE, WETH_TOKEN, rmtChainId, getFeeData, currency, SwapTokenAmount, address)
         console.log("-----------------------------------------------------------")
-        if (!toChain || !SwapTokenAmount || !getFeeData || !currency || Number(SwapTokenAmount) <= 0) return;
+        if (!toChain || !SwapTokenAmount || !getFeeData || !currency) return;
+        if (Number(SwapTokenAmount) <= 0 || SwapTokenAmount.includes('.')) { toast({ title: "Amount can only be positive Integer" }); return; }
 
         setBridgeLoading(true)
 
@@ -229,6 +230,7 @@ export default function BridgeOutCard() {
 
                         <div className="flex items-center justify-start gap-3">
                             <Input
+                                min="1"
                                 type="number"
                                 value={SwapTokenAmount}
                                 onChange={(e) => setSwapTokenAmount(e.target.value)}
@@ -266,7 +268,7 @@ export default function BridgeOutCard() {
             <CardFooter>
                 <Button
                     className="w-full flex justify-center items-center gap-3"
-                    disabled={!fromChain || !toChain || !SwapTokenAmount || bridgeLoading || !rmtChainId}
+                    disabled={!fromChain || !toChain || !SwapTokenAmount || bridgeLoading || !rmtChainId || isDisconnected || !address}
                     onClick={handleBridgeOut}
                 >
                     {
