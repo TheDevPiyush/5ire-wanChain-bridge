@@ -113,7 +113,8 @@ export default function BridgeOutCard() {
                 abi: FireHub.abi,
                 functionName: "bridgeETH",
                 value: value,
-                args: [bridgeInfo]
+                args: [bridgeInfo],
+                gas: 500000
             })
         }
         catch (e) {
